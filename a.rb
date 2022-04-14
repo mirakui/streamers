@@ -31,9 +31,7 @@ def youtube_get_live_stream_details(video_id)
   youtube_get('/youtube/v3/videos', "id=#{video_id}&part=liveStreamingDetails")
 end
 
-channel_ids = %w(
-UC5CwaMl1eIgY8h02uZw7u8A
-)
+channel_ids = IO.read('hololive_channels.tsv').chomp.split("\n").map {|line| line.split("\t").last.chomp }
 
 channels = {}
 videos = {}
@@ -41,6 +39,9 @@ videos = {}
 channel_ids.each do |channel_id|
   result = youtube_get_live_streams(channel_id)
   video = result['items']&.first
+  unless video
+    next
+  end
   title = video['snippet']['title']
   channel_title = video['snippet']['channelTitle']
   video_id = video['id']['videoId']
