@@ -13,7 +13,7 @@ def youtube_get(path, queries=nil)
   res = Net::HTTP.get_response(youtube_uri(path, queries))
 
   if res.code != '200'
-    raise res.code_type.to_s
+    raise res.body
   end
 
   JSON.parse(res.body)

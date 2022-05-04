@@ -1,12 +1,13 @@
 module YouTube
   module Models
     class Video
-      attr_reader :video_id, :watching
+      attr_reader :id, :watching
 
-      def initialize(client, video_id, watching: nil)
+      def initialize(client, video_id, watching: nil, title: nil)
         @client = client
-        @video_id = video_id
+        @id = video_id
         @watching = watching
+        @title = title
       end
     end
   end

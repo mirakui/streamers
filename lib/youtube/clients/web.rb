@@ -10,8 +10,8 @@ module YouTube
       def initialize
       end
 
-      def fetch_channel_videos_on_live(channel_id)
-        uri = build_uri("/channel/#{channel_id}/video", {view: 2, live_view: 501})
+      def fetch_channel_video_on_live(channel_id)
+        uri = build_uri("/channel/#{channel_id}/videos", {view: 2, live_view: 501})
         fetch(uri)
       end
 
@@ -33,8 +33,7 @@ module YouTube
         unless res.code_type == Net::HTTPOK
           raise "fetch error (#{res.code}): #{uri}"
         end
-        # puts uri
-        # matched = res.body.match(%r/ytInitialPlayerResponse\s*=(.*)/)
+
         matched = res.body.match(%r!var ytInitialData\s*=\s*(.*?);</script>!m)
         unless matched
           raise "body parse error: #{uri}"
