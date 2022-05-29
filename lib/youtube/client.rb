@@ -13,42 +13,43 @@ module YouTube
       begin
         approx_subscribers_str = res['header']['c4TabbedHeaderRenderer']['subscriberCountText']['simpleText']
       rescue
-        raise "failed to parse subscriberCountText: channel_id=#{channel_id}"
+        raise "failed to extract subscriberCountText: channel_id=#{channel_id}"
       end
       approx_subscribers = self.class.parse_approx_subscribers(approx_subscribers_str)
 
+      begin
+        channel_name = res['header']['c4TabbedHeaderRenderer']['title']
+      rescue
+        raise "failed to extract video title: channel_id=#{channel_id}"
+      end
+      unless channel_name =~ /[^\s]+/
+        raise "unexpected channel name: #{channel_name.inspect}"
+      end
 
       video_renderer = nil
       begin
-        video_renderer = res['contents']['twoColumnBrowseResultsRenderer']['tabs'].
-          first['tabRenderer']['content']['sectionListRenderer']['contents'].
+        video_renderer = res['contents']['twoColumnBrowseResultsRenderer']['tabs'][1]['tabRenderer']['content']['sectionListRenderer']['contents'].
           first['itemSectionRenderer']['contents'].
-          first['channelFeaturedContentRenderer']['items'].
-          first['videoRenderer']
+          first['gridRenderer']['items'].
+          first['gridVideoRenderer']
       rescue
         # do nothing
       end
 
       video_id = nil
       watching = nil
-      title = nil
-      channel_name = nil
-      if video_renderer
+      # if video-on-live exists
+      if video_renderer && video_renderer['viewCountText']['runs']
         video_id = video_renderer['videoId']
-        unless video_id =~ /\A[a-zA-Z0-9]+\z/
+        unless video_id =~ /\A[a-zA-Z0-9\-]+\z/
           raise "unexpected video id: #{video_id}"
         end
 
         watching_str = video_renderer['viewCountText']['runs'].first['text']
-        unless watching_str =~ /\A\d+\z/
+        unless watching_str =~ /\A[\d,]+\z/
           raise "unexpected 'watching' count: #{watching_str}"
         end
-        watching = watching_str.to_i
-
-        channel_name = video_renderer['longBylineText']['runs'].first['text']
-        unless channel_name =~ /[^\s]+/
-          raise "unexpected channel name: #{channel_name.inspect}"
-        end
+        watching = watching_str.gsub(',', '').to_i
 
         title = video_renderer['title']['runs'].first['text']
       end

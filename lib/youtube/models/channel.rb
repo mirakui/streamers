@@ -15,8 +15,11 @@ module YouTube
 
       def video_on_live
         res = fetch_video_on_live_cached
-        video = Video.new(@client, res[:video_id], watching: res[:watching], title: res[:title])
-        video
+        if res[:video_id]
+          Video.new(@client, res[:video_id], watching: res[:watching], title: res[:title])
+        else
+          nil
+        end
       end
 
       def name
