@@ -41,7 +41,7 @@ module YouTube
       # if video-on-live exists
       if video_renderer && video_renderer['viewCountText']['runs']
         video_id = video_renderer['videoId']
-        unless video_id =~ /\A[a-zA-Z0-9\-]+\z/
+        unless video_id =~ /\A[a-zA-Z0-9\-_]+\z/
           raise "unexpected video id: #{video_id}"
         end
 
